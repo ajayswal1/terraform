@@ -1,0 +1,2 @@
+This is git testing file 2 
+root=1

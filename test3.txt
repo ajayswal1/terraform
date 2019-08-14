@@ -1,2 +1,0 @@
-This is git testing file 3
-user = dell

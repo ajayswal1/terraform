@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: prometheus-claim0
+    labels:
+        project-name: {{ .Values.project.name }}
+spec:
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 100Mi
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: prometheus-claim1
+    labels:
+        project-name: {{ .Values.project.name }}
+spec:
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 100Mi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: prometheus
+    labels:
+        app: prometheus
+        project-name: {{ .Values.project.name }}
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: prometheus
+    template:
+        metadata:
+            labels:
+                app: prometheus
+                project-name: {{ .Values.project.name }}
+        spec:
+            containers:
+                - image: quay.io/prometheus/prometheus
+                  name: prometheus
+                  ports:
+                      - containerPort: 9090
+                  resources: {}
+                  volumeMounts:
+                      - mountPath: /etc/prometheus/prometheus.yml
+                        name: prometheus-claim0
+                        subPath: prometeus.yml
+                      - mountPath: /prometheus
+                        name: prometheus-claim1
+            hostname: prometheus
+            restartPolicy: Always
+            volumes:
+                - name: prometheus-claim0
+                  configMap:
+                      name: icm-ingest-poc-prometheus-configmap
+                - name: prometheus-claim1
+                  persistentVolumeClaim:
+                      claimName: prometheus-claim1
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        app: prometheus
+        project-name: {{ .Values.project.name }}
+    name: prometheus
+spec:
+    type: {{ .Values.service.type }}
+    ports:
+        - name: "9090"
+          port: 9090
+          targetPort: 9090
+    selector:
+        app: prometheus

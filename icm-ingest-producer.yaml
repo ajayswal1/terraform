@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: icm-ingest-producer-deployment
+    labels:
+      app: icm-ingest-producer
+      project-name: {{ .Values.project.name }}
+spec:
+  replicas: 1
+  selector:
+      matchLabels:
+        app: icm-ingest-producer
+  template:
+      metadata:
+        labels:
+          app: icm-ingest-producer
+          project-name: {{ .Values.project.name }}
+      spec:
+        containers:
+          - env:
+            - name: APP_HOST
+              value: 0.0.0.0
+            - name: APP_PORT
+              value: "9000"
+            - name: PROMETHEUS_PORT
+              value: "9095"
+            name: icm-ingest-producer
+            image: icm-ingest-producer:0.0.0.1
+            imagePullPolicy: {{ .Values.settings.poolPolicy }}
+            ports:
+              - containerPort: 9000
+                name: app-port
+                protocol: TCP
+              - containerPort: 9095
+                name: prometheus-port
+                protocol: TCP
+            resources: {}
+        hostname: icm-ingest-producer
+        restartPolicy: Always
+        volumes:
+          - name: icm-ingest-producer-volume
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: icm-ingest-producer
+    labels:
+        app: icm-ingest-producer
+        project-name: {{ .Values.project.name }}
+spec:
+    type: {{ .Values.service.type }}
+    ports:
+        - name: "app-port"
+          port: 9000
+          targetPort: 9000
+        - name: "prometheus-port"
+          port: 9095
+          targetPort: 9095
+    selector:
+        app: icm-ingest-producer
+
+

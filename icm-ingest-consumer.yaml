@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: icm-ingest-consumer-deployment
+    labels:
+        app: icm-ingest-consumer
+        project-name: {{ .Values.project.name }}
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: icm-ingest-consumer
+    strategy: {}
+    template:
+        metadata:
+            labels:
+                app: icm-ingest-consumer
+                project-name: {{ .Values.project.name }}
+        spec:
+            containers:
+                - env:
+                      - name: PROMETHEUS_PORT
+                        value: "9096"
+                  image: icm-ingest-consumer:0.0.0.1
+                  name: icm-ingest-consumer
+                  imagePullPolicy: {{ .Values.settings.poolPolicy }}
+                  ports:
+                      - containerPort: 9096
+                  resources: {}
+            hostname: icm-ingest-consumer
+            restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: icm-ingest-consumer
+    labels:
+        app: icm-ingest-consumer
+        project-name: {{ .Values.project.name }}
+spec:
+    type: {{ .Values.service.type }}
+    ports:
+        - name: "prometheus-custom-metrics-port"
+          port: 9096
+          targetPort: 9096
+    selector:
+        app: icm-ingest-consumer

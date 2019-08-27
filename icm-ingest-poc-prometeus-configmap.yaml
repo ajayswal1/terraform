@@ -1,0 +1,14 @@
+apiVersion: v1
+data:
+  prometeus.yml: |-
+    global:
+      scrape_interval: 2s # By default, scrape targets every 15 seconds.
+
+    scrape_configs:
+      - job_name: icm-poc-prometheus
+        scrape_interval: 2s
+        static_configs:
+          - targets: ['icm-ingest-consumer:9096', 'icm-ingest-producer:9095']
+kind: ConfigMap
+metadata:
+  name: icm-ingest-poc-prometheus-configmap

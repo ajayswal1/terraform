@@ -1,0 +1,8 @@
+project:
+  name: icm-ingest-poc
+
+settings:
+  poolPolicy: Never
+
+service:
+  type: NodePort

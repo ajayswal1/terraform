@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: my-deployment
+  labels:
+    something: everything
+spec:
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        env: prod
+    spec:
+      containers:
+      - name: sample-containers
+        image: httpd
+        ports:
+        - containerPort: 80
